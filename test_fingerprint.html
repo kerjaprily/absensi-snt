@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Uji Coba Push Fingerprint</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px;}
+        .input-group input, .input-group select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background: #4F46E5; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
+        button:hover { background: #4338CA; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Simulasi Mesin Fingerprint</h2>
+        <p style="font-size: 14px; color: #555;">Form ini meniru mesin fingerprint (seperti ZKTeco) yang sedang mengirim data absensi ke server via HTTP POST.</p>
+        
+        <form action="api/fingerprint_push.php" method="POST" target="_blank">
+            <div class="input-group">
+                <label>PIN (ID User di Mesin):</label>
+                <input type="text" name="pin" value="1001" required>
+                <small style="color: gray;">(1001 adalah PIN dummy Admin)</small>
+            </div>
+            
+            <div class="input-group">
+                <label>Waktu Absen:</label>
+                <!-- Set default ke waktu sekarang -->
+                <input type="text" name="time" id="current_time" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Status (Auth Type):</label>
+                <select name="status">
+                    <option value="0">0 (Masuk)</option>
+                    <option value="1">1 (Pulang)</option>
+                </select>
+            </div>
+            
+            <button type="submit">Kirim Data Absen</button>
+        </form>
+    </div>
+
+    <script>
+        // Mengisi input time dengan format waktu lokal sekarang (YYYY-MM-DD HH:MM:SS)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current_time').value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    </script>
+</body>
+</html>

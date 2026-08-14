@@ -1,0 +1,33 @@
+# Gitignore untuk Proyek PHP dan Expo React Native
+
+# Umum
+.DS_Store
+*.log
+webapp_ready.zip
+absensi_db_full.sql
+absensi_db_compatible.sql
+absensi_db_clean.sql
+
+# PHP / Composer
+vendor/
+.env
+
+# Mobile App (Expo)
+mobile-app/node_modules/
+mobile-app/.expo/
+mobile-app/dist/
+mobile-app/npm-debug.*
+mobile-app/*.jks
+mobile-app/*.p8
+mobile-app/*.p12
+mobile-app/*.key
+mobile-app/*.mobileprovision
+mobile-app/*.orig.*
+mobile-app/web-build/
+mobile-absensi/node_modules/
+mobile-absensi/.expo/
+
+# IDEs
+.idea/
+.vscode/
+*.swp

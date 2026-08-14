@@ -1,0 +1,26 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main # Jalankan otomatis ketika ada push/perubahan ke branch 'main'
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Sync files to VPS via rsync
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        ARGS: "-rltgoDzvO --delete"
+        SOURCE: "./" # Folder yang ingin diupload (semuanya)
+        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.SERVER_USER }}
+        TARGET: ${{ secrets.SERVER_TARGET_DIR }}
+        EXCLUDE: "/mobile-app/, /mobile-absensi/, /.git/, /.github/, /webapp_ready.zip, /*.sql"
