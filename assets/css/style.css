@@ -152,6 +152,12 @@ body {
     gap: 10px;
 }
 
+.sidebar .logo img {
+    background-color: #FFFFFF;
+    padding: 3px;
+    border-radius: 6px;
+}
+
 .sidebar-nav {
     display: flex;
     flex-direction: column;
