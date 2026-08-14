@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main # Jalankan otomatis ketika ada push/perubahan ke branch 'main'
+      - master # Jalankan otomatis ketika ada push/perubahan ke branch 'master'
 
 jobs:
   deploy:
