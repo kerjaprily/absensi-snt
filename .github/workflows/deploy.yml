@@ -22,6 +22,7 @@ jobs:
           --exclude="/mobile-absensi/" \
           --exclude="/.git/" \
           --exclude="/.github/" \
+          --exclude="/config/Database.php" \
           --exclude="webapp_ready.zip" \
           --exclude="*.sql" \
           ./ ${{ secrets.SERVER_TARGET_DIR }}
