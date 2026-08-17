@@ -30,7 +30,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
-                <img src="assets/images/logo-snt.png" alt="Logo" style="width:30px; height:30px; border-radius:4px;">
+                <img src="assets/images/logo-snt.png" alt="Logo" style="width:30px; height:30px; background-color: #FFFFFF; padding: 2px; border-radius:6px;">
                 <span>Absensi Pintar</span>
             </div>
             
