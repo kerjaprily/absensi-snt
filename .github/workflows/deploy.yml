@@ -16,8 +16,8 @@ jobs:
 
     - name: Sync files to Webroot
       run: |
-        # Mengkopi file dari workspace Runner ke folder web server tujuan
-        rsync -rltgoDzvO --delete \
+        # Mengkopi file dari workspace Runner ke folder web server tujuan tanpa memaksa perubahan Owner/Group
+        rsync -rltDzvO --delete \
           --exclude="/mobile-app/" \
           --exclude="/mobile-absensi/" \
           --exclude="/.git/" \
