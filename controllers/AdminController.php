@@ -137,15 +137,55 @@ class AdminController {
         $attendance = new Attendance($this->db);
         $userObj = new User($this->db);
         
-        $selectedMonth = $_GET['month'] ?? date('m');
-        $selectedYear = $_GET['year'] ?? date('Y');
         $selectedUserId = $_GET['user_id'] ?? '';
-        
-        $start_date = sprintf("%04d-%02d-01", $selectedYear, $selectedMonth);
-        $end_date = date("Y-m-t", strtotime($start_date));
+        $start_date = $_GET['start_date'] ?? date('Y-m-01');
+        $end_date = $_GET['end_date'] ?? date('Y-m-t');
         
         $logs = $attendance->getAllFilteredLogs($start_date, $end_date, $selectedUserId);
-        $users = $userObj->getAllUsers();
+        
+        // Fitur Export Data
+        if (isset($_GET['export']) && $_GET['export'] == 'excel') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=Rekap_Absensi_' . $start_date . '_sd_' . $end_date . '.csv');
+            $output = fopen('php://output', 'w');
+            
+            fputcsv($output, ['Nama Lengkap', 'Jabatan', 'Tanggal', 'Jam Masuk', 'Jam Keluar', 'Status', 'Total Jam Kerja']);
+            
+            foreach ($logs as $log) {
+                $jam_masuk = $log['jam_masuk'] ?: '-';
+                $jam_keluar = $log['jam_keluar'] ?: '-';
+                $status = 'Lengkap';
+                $total_jam = '-';
+                
+                if ($jam_masuk !== '-' && $jam_keluar !== '-') {
+                    $t1 = strtotime($jam_masuk);
+                    $t2 = strtotime($jam_keluar);
+                    $diff = round(abs($t2 - $t1) / 3600, 1);
+                    $total_jam = $diff . ' Jam';
+                } elseif ($jam_masuk !== '-' && $jam_keluar === '-') {
+                    $status = 'Belum Pulang';
+                } elseif ($jam_masuk === '-' && $jam_keluar !== '-') {
+                    $status = 'Hanya Pulang';
+                } else {
+                    $status = 'Tidak Absen';
+                }
+                
+                fputcsv($output, [
+                    $log['user_name'],
+                    $log['role_name'],
+                    $log['scan_date'],
+                    $jam_masuk,
+                    $jam_keluar,
+                    $status,
+                    $total_jam
+                ]);
+            }
+            fclose($output);
+            exit;
+        }
+
+        $allUsers = $userObj->getAllUsers();
+        $filter_user_id = $selectedUserId;
 
         require 'views/admin/rekap.php';
     }

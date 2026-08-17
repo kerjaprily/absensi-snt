@@ -67,38 +67,60 @@
                     <input type="date" name="end_date" value="<?php echo htmlspecialchars($end_date); ?>">
                 </div>
                 <button type="submit" class="btn-sm">Filter Laporan</button>
+                <button type="submit" name="export" value="excel" class="btn-sm" style="background: var(--success);">⬇️ Export Excel</button>
             </form>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Nama</th>
-                            <th>Role</th>
+                            <th>Nama Lengkap</th>
+                            <th>Jabatan</th>
                             <th>Tanggal</th>
-                            <th>Jam</th>
-                            <th>Tipe</th>
-                            <th>Metode</th>
+                            <th>Jam Masuk</th>
+                            <th>Jam Keluar</th>
+                            <th>Status</th>
+                            <th>Total Jam</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if(count($logs) > 0): ?>
-                            <?php foreach($logs as $log): ?>
+                            <?php foreach($logs as $log): 
+                                $jam_masuk = $log['jam_masuk'] ?: '-';
+                                $jam_keluar = $log['jam_keluar'] ?: '-';
+                                
+                                $status_badge = 'in';
+                                $status_text = 'Lengkap';
+                                $total_jam = '-';
+
+                                if ($jam_masuk !== '-' && $jam_keluar !== '-') {
+                                    $t1 = strtotime($jam_masuk);
+                                    $t2 = strtotime($jam_keluar);
+                                    $diff = round(abs($t2 - $t1) / 3600, 1);
+                                    $total_jam = $diff . ' Jam';
+                                } elseif ($jam_masuk !== '-' && $jam_keluar === '-') {
+                                    $status_badge = 'out';
+                                    $status_text = 'Belum Pulang';
+                                } elseif ($jam_masuk === '-' && $jam_keluar !== '-') {
+                                    $status_badge = 'out';
+                                    $status_text = 'Hanya Pulang';
+                                } else {
+                                    $status_badge = 'out';
+                                    $status_text = 'Tidak Absen';
+                                }
+                            ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($log['user_name']); ?></td>
                                 <td><?php echo htmlspecialchars($log['role_name']); ?></td>
-                                <td><?php echo $log['scan_date']; ?></td>
-                                <td><?php echo $log['scan_time']; ?></td>
-                                <td>
-                                    <span class="badge <?php echo strtolower($log['auth_type']); ?>">
-                                        <?php echo $log['auth_type']; ?>
-                                    </span>
-                                </td>
-                                <td><?php echo $log['source']; ?></td>
+                                <td><?php echo date('d M Y', strtotime($log['scan_date'])); ?></td>
+                                <td><span style="font-weight: 600; color: var(--success);"><?php echo $jam_masuk; ?></span></td>
+                                <td><span style="font-weight: 600; color: var(--primary);"><?php echo $jam_keluar; ?></span></td>
+                                <td><span class="badge <?php echo $status_badge; ?>"><?php echo $status_text; ?></span></td>
+                                <td><span style="font-weight: bold;"><?php echo $total_jam; ?></span></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="6" style="text-align: center;">Tidak ada data pada periode ini.</td></tr>
+                            <tr><td colspan="7" style="text-align: center;">Tidak ada data pada periode ini.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

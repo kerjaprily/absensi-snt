@@ -69,46 +69,34 @@ class Attendance {
 
     // --- NEW RECAP METHOD FOR ADMIN ---
     public function getAllFilteredLogs($start_date, $end_date, $user_id = null) {
-        $query = "SELECT a.*, u.name as user_name, r.name as role_name 
+        $query = "SELECT 
+                    a.user_id,
+                    u.name as user_name, 
+                    r.name as role_name,
+                    a.scan_date,
+                    MIN(CASE WHEN a.auth_type = 'IN' THEN a.scan_time END) as jam_masuk,
+                    MAX(CASE WHEN a.auth_type = 'OUT' THEN a.scan_time END) as jam_keluar
                   FROM " . $this->table_name . " a
-                  JOIN (
-                      SELECT user_id, scan_date, MIN(scan_time) as scan_time, auth_type 
-                      FROM " . $this->table_name . " 
-                      WHERE scan_date >= :start_date_in AND scan_date <= :end_date_in AND auth_type = 'IN'
-                      GROUP BY user_id, scan_date, auth_type
-                      
-                      UNION ALL
-                      
-                      SELECT user_id, scan_date, MAX(scan_time) as scan_time, auth_type 
-                      FROM " . $this->table_name . " 
-                      WHERE scan_date >= :start_date_out AND scan_date <= :end_date_out AND auth_type = 'OUT'
-                      GROUP BY user_id, scan_date, auth_type
-                  ) filter_q ON a.user_id = filter_q.user_id 
-                            AND a.scan_date = filter_q.scan_date 
-                            AND a.scan_time = filter_q.scan_time 
-                            AND a.auth_type = filter_q.auth_type
                   JOIN users u ON a.user_id = u.id
                   JOIN roles r ON u.role_id = r.id
-                  WHERE 1=1";
+                  WHERE a.scan_date >= :start_date AND a.scan_date <= :end_date";
                   
         if (!empty($user_id)) {
             $query .= " AND a.user_id = :user_id";
         }
         
-        $query .= " ORDER BY a.scan_date DESC, u.name ASC, a.scan_time DESC";
+        $query .= " GROUP BY a.user_id, a.scan_date, u.name, r.name
+                    ORDER BY a.scan_date DESC, u.name ASC";
                   
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":start_date_in", $start_date);
-        $stmt->bindParam(":end_date_in", $end_date);
-        $stmt->bindParam(":start_date_out", $start_date);
-        $stmt->bindParam(":end_date_out", $end_date);
+        $stmt->bindParam(":start_date", $start_date);
+        $stmt->bindParam(":end_date", $end_date);
         
         if (!empty($user_id)) {
             $stmt->bindParam(":user_id", $user_id);
         }
         
         $stmt->execute();
-        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
