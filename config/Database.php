@@ -7,10 +7,10 @@ use PDO;
 use PDOException;
 
 class Database {
-    private $host = "localhost";
+    private $host = "127.0.0.1";
     private $db_name = "absensi_db";
-    private $username = "root"; // Default XAMPP username
-    private $password = "Meong#0404";     // Default XAMPP password
+    private $username = "root"; // Default username
+    private $password = "Meong#0404"; // Default password
     public $conn;
 
     public function getConnection() {
