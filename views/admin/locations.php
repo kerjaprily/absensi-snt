@@ -6,6 +6,8 @@
     <title>Kelola Lokasi - Admin</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         .table-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; }
@@ -53,18 +55,26 @@
             <?php if($message) echo "<div class='alert' style='background:rgba(255,255,255,0.1)'>$message</div>"; ?>
             <form method="POST" action="admin/locations">
                 <input type="hidden" name="action" value="add">
+                
+                <p style="font-size: 13px; font-weight: 600; margin-bottom: 5px;">Pilih Titik di Peta</p>
+                <div id="map" style="height: 250px; width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); z-index: 1;"></div>
+
                 <div class="form-group">
                     <label style="font-size: 13px;">Nama Gedung / Area</label>
                     <input type="text" name="name" required placeholder="Contoh: Gedung B">
                 </div>
-                <div class="form-group">
-                    <label style="font-size: 13px;">Latitude</label>
-                    <input type="text" name="latitude" required placeholder="Contoh: -6.123456">
+                
+                <div class="grid-2" style="gap: 15px; grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+                    <div class="form-group">
+                        <label style="font-size: 13px;">Latitude</label>
+                        <input type="text" name="latitude" id="lat_input" required placeholder="Contoh: -6.123456">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 13px;">Longitude</label>
+                        <input type="text" name="longitude" id="lng_input" required placeholder="Contoh: 106.123456">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label style="font-size: 13px;">Longitude</label>
-                    <input type="text" name="longitude" required placeholder="Contoh: 106.123456">
-                </div>
+                
                 <div class="form-group">
                     <label style="font-size: 13px;">Batas Radius (Meter)</label>
                     <input type="number" name="radius_meters" value="100" required>
@@ -108,6 +118,74 @@
     </main>
     </div>
 </body>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    // Default location (Jakarta)
+    var defaultLat = -6.200000;
+    var defaultLng = 106.816666;
+    
+    var map = L.map('map').setView([defaultLat, defaultLng], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    var marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
+    
+    var latInput = document.getElementById('lat_input');
+    var lngInput = document.getElementById('lng_input');
+
+    // Function to update inputs
+    function updateInputs(lat, lng) {
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6);
+    }
+    
+    // Set initial values
+    updateInputs(defaultLat, defaultLng);
+
+    // Update on marker drag
+    marker.on('dragend', function (e) {
+        var position = marker.getLatLng();
+        updateInputs(position.lat, position.lng);
+    });
+
+    // Update on map click
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateInputs(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Allow manual input update
+    latInput.addEventListener('change', function() {
+        var newLat = parseFloat(this.value);
+        if(!isNaN(newLat)) {
+            var currentLng = marker.getLatLng().lng;
+            marker.setLatLng([newLat, currentLng]);
+            map.setView([newLat, currentLng]);
+        }
+    });
+
+    lngInput.addEventListener('change', function() {
+        var newLng = parseFloat(this.value);
+        if(!isNaN(newLng)) {
+            var currentLat = marker.getLatLng().lat;
+            marker.setLatLng([currentLat, newLng]);
+            map.setView([currentLat, newLng]);
+        }
+    });
+
+    // Try to get user's current location if possible
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+            map.setView([lat, lng], 15);
+            marker.setLatLng([lat, lng]);
+            updateInputs(lat, lng);
+        });
+    }
+</script>
 </html>
-
-
