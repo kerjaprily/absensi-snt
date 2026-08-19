@@ -57,7 +57,13 @@
             <form method="POST" action="admin/locations">
                 <input type="hidden" name="action" value="add">
                 
-                <p style="font-size: 13px; font-weight: 600; margin-bottom: 5px;">Pilih Titik di Peta</p>
+                <div class="form-group" style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border: 1px dashed #3b82f6; margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #3b82f6;">💡 Alternatif Cepat (dari Google Maps)</label>
+                    <input type="text" id="gmaps_paste" placeholder="Paste Koordinat atau Link Google Maps di sini..." style="border-color: rgba(59, 130, 246, 0.5); background: white;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.4;">Buka Google Maps > Klik Kanan di titik tujuan > Copy deretan angka koordinat pertama > Paste ke kotak ini. Pin akan otomatis berpindah secara akurat.</div>
+                </div>
+
+                <p style="font-size: 13px; font-weight: 600; margin-bottom: 5px;">Atau Cari / Pilih Manual di Peta</p>
                 <div id="map" style="height: 250px; width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); z-index: 1;"></div>
 
                 <div class="form-group">
@@ -190,6 +196,44 @@
             var currentLat = marker.getLatLng().lat;
             marker.setLatLng([currentLat, newLng]);
             map.setView([currentLat, newLng]);
+        }
+    });
+
+    // Magic Google Maps Paste Extractor
+    var gmapsPaste = document.getElementById('gmaps_paste');
+    gmapsPaste.addEventListener('input', function() {
+        var val = this.value.trim();
+        if (!val) return;
+
+        var lat = null, lng = null;
+
+        // Pattern 1: Raw Coordinates (e.g., 0.7095, 127.4042)
+        var coordMatch = val.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+        if (coordMatch) {
+            lat = parseFloat(coordMatch[1]);
+            lng = parseFloat(coordMatch[2]);
+        } 
+        // Pattern 2: URL format (e.g., @-6.200,106.816,15z)
+        else {
+            var urlMatch = val.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (urlMatch) {
+                lat = parseFloat(urlMatch[1]);
+                lng = parseFloat(urlMatch[2]);
+            }
+        }
+
+        if (lat !== null && lng !== null) {
+            map.setView([lat, lng], 17);
+            marker.setLatLng([lat, lng]);
+            updateInputs(lat, lng);
+            
+            // Visual feedback effect
+            this.style.background = "#dcfce3";
+            this.style.borderColor = "#22c55e";
+            setTimeout(() => {
+                this.style.background = "white";
+                this.style.borderColor = "rgba(59, 130, 246, 0.5)";
+            }, 1000);
         }
     });
 
