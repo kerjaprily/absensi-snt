@@ -6,8 +6,9 @@
     <title>Kelola Lokasi - Admin</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS & Geocoder -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <style>
         .table-container { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; }
@@ -118,8 +119,9 @@
     </main>
     </div>
 </body>
-<!-- Leaflet JS -->
+<!-- Leaflet JS & Geocoder -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <script>
     // Default location (Jakarta)
     var defaultLat = -6.200000;
@@ -131,6 +133,19 @@
         maxZoom: 19,
         attribution: '© OpenStreetMap'
     }).addTo(map);
+
+    // Geocoder Search Box
+    var geocoder = L.Control.geocoder({
+        defaultMarkGeocode: false,
+        placeholder: "Cari nama tempat..."
+    })
+    .on('markgeocode', function(e) {
+        var latlng = e.geocode.center;
+        map.setView(latlng, 16);
+        marker.setLatLng(latlng);
+        updateInputs(latlng.lat, latlng.lng);
+    })
+    .addTo(map);
 
     var marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
     
