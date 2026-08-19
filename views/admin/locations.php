@@ -134,10 +134,11 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Geocoder Search Box
+    // Geocoder Search Box (Using Photon for faster free search)
     var geocoder = L.Control.geocoder({
         defaultMarkGeocode: false,
-        placeholder: "Cari nama tempat..."
+        placeholder: "Cari nama tempat...",
+        geocoder: L.Control.Geocoder.photon()
     })
     .on('markgeocode', function(e) {
         var latlng = e.geocode.center;
